@@ -18,12 +18,11 @@ struct mes* criarCalendario() {
 
 struct tm* receberData(struct mes* calendario) {
   size_t tamInicial = 1;
-  size_t strDataTam;
   char* strData = malloc(tamInicial * sizeof(char));
 
   printf("\nQual data você quer criar seu agendamento? (dd/mm) Exemplo: 23/07\n");
   printf("--> ");
-  strDataTam = getline(&strData, &tamInicial, stdin);
+  getline(&strData, &tamInicial, stdin);
   char* diaStr = strtok(strData, "/");
   if (diaStr == NULL) diaStr = "0";
   char* mesStr = strtok(NULL, "/");
@@ -38,7 +37,7 @@ struct tm* receberData(struct mes* calendario) {
     printf("Data inválida, digite novamente:\n");
     printf("--> ");
     strData = malloc(tamInicial * sizeof(char));
-    strDataTam = getline(&strData, &tamInicial, stdin);
+    getline(&strData, &tamInicial, stdin);
     diaStr = strtok(strData, "/");
     if (diaStr == NULL) diaStr = "0";
     mesStr = strtok(NULL, "/");
@@ -103,6 +102,8 @@ int buscarAgendamentoPorData(struct tm* data, struct mes* calendario) {
     if (agend == NULL)
       return 0;
   }
+
+  return 0;
 }
 
 char* receberDescricao() {
@@ -371,12 +372,11 @@ void listarAgendamentos(struct mes* calendario) {
 
     if (opcaoEscolhida == 3) {
       size_t tamInicial = 1;
-      size_t strDataTam;
       char* strData = malloc(tamInicial * sizeof(char));
     
       printf("\nDigite data na qual você deseja listar os agendamentos: (dd/mm) Exemplo: 23/05\n");
       printf("--> ");
-      strDataTam = getline(&strData, &tamInicial, stdin);
+      getline(&strData, &tamInicial, stdin);
       char* diaStr = strtok(strData, "/");
       if (diaStr == NULL) diaStr = "0";
       char* mesStr = strtok(NULL, "/");
@@ -391,7 +391,7 @@ void listarAgendamentos(struct mes* calendario) {
         printf("Data inválida, digite novamente:\n");
         printf("--> ");
         strData = malloc(tamInicial * sizeof(char));
-        strDataTam = getline(&strData, &tamInicial, stdin);
+        getline(&strData, &tamInicial, stdin);
         diaStr = strtok(strData, "/");
         if (diaStr == NULL) diaStr = "0";
         mesStr = strtok(NULL, "/");
