@@ -301,7 +301,7 @@ void listarAgendamentos(struct mes* calendario) {
   }
 
   printf("\nListar Agendamentos\n");
-  printf("0 - Sair\n");
+  printf("0 - Voltar para o menu principal\n");
   printf("1 - Todos os agendamentos\n");
   printf("2 - Um mês específico\n");
   printf("3 - Um dia específico\n");
@@ -370,43 +370,66 @@ void listarAgendamentos(struct mes* calendario) {
     }
 
     if (opcaoEscolhida == 3) {
+      size_t tamInicial = 1;
+      size_t strDataTam;
+      char* strData = malloc(tamInicial * sizeof(char));
+    
       printf("\nDigite data na qual você deseja listar os agendamentos: (dd/mm) Exemplo: 23/05\n");
       printf("--> ");
-      char mesEscolhidoStr[8];
-      fgets(mesEscolhidoStr, sizeof(mesEscolhidoStr), stdin);
-      int mesEscolhido= atoi(mesEscolhidoStr);
+      strDataTam = getline(&strData, &tamInicial, stdin);
+      char* diaStr = strtok(strData, "/");
+      if (diaStr == NULL) diaStr = "0";
+      char* mesStr = strtok(NULL, "/");
+      if (mesStr == NULL) mesStr = "0";
+      int diaEscolhido = atoi(diaStr);
+      int mesEscolhido = atoi(mesStr);
 
-      while(mesEscolhido < 0 || mesEscolhido > 12) {
-        printf("O número deve ser entre 1 e 12 (inclusos), digite novamente:\n");
+      // Verifica se: 
+      //  - O dia recebido está entre 1 e 31;
+      //  - O mês recebido está entre 1 e 12;
+      while(diaEscolhido > 31 || diaEscolhido < 1 || mesEscolhido > 12 || mesEscolhido < 1) {
+        printf("Data inválida, digite novamente:\n");
         printf("--> ");
-        fgets(mesEscolhidoStr, sizeof(mesEscolhidoStr), stdin);
-        mesEscolhido= atoi(mesEscolhidoStr);
-
+        strData = malloc(tamInicial * sizeof(char));
+        strDataTam = getline(&strData, &tamInicial, stdin);
+        diaStr = strtok(strData, "/");
+        if (diaStr == NULL) diaStr = "0";
+        mesStr = strtok(NULL, "/");
+        if (mesStr == NULL) mesStr = "0";
+        diaEscolhido = atoi(diaStr);
+        mesEscolhido = atoi(mesStr);
       }
+      free(strData);
 
       if (calendario[mesEscolhido-1].qtdeDias == 0) {
         printf("O mês digitado não possui agendamentos registrados!\n");
       } else {
         const char* mesesStr[] = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
 
-        printf("\nListando todos os agendamentos do mês de %s:\n", mesesStr[mesEscolhido-1]);
-        printf("________________________________________________\n");
         struct dia* dia = calendario[mesEscolhido-1].primeiroDia;
-        while (dia != NULL) {
-          struct agendamento* agend= dia->primeiroAgendamento;
+        while (dia != NULL && dia->numDia != diaEscolhido) {
+          dia = dia->prox;
+        }
+  
+        if (dia == NULL || dia->qtdeAgendamentos == 0) {
+          printf("O dia digitado não possui agendamentos registrados!\n");
+        } else {
+          printf("\nListando todos os agendamentos do dia %d de %s:\n", diaEscolhido, mesesStr[mesEscolhido-1]);
+          printf("________________________________________________\n");
+
+          struct agendamento* agend = dia->primeiroAgendamento;
           while (agend != NULL) {
             printf("\nData: %d/%d/2023, %dh\n", agend->data.tm_mday, agend->data.tm_mon+1, agend->data.tm_hour);
             printf("Descrição: %s\n", agend->descricao);
             printf("________________________________________________\n");
             agend = agend->prox;
           }
-          dia = dia->prox;
         }
       }
     }
 
     printf("\nListar Agendamentos\n");
-    printf("0 - Sair\n");
+    printf("0 - Voltar para o menu principal\n");
     printf("1 - Todos os agendamentos\n");
     printf("2 - Um mês específico\n");
     printf("3 - Um dia específico\n");
@@ -418,5 +441,38 @@ void listarAgendamentos(struct mes* calendario) {
 }
 
 void fecharCalendario(struct mes* calendario) {
- return;
+  for(int i = 0; i < 12; i++) {
+    struct dia* diaAtual = calendario[i].primeiroDia;
+    struct dia* proxDia = NULL;
+
+    if (diaAtual != NULL)
+      proxDia = diaAtual->prox;
+
+    while (diaAtual != NULL) {
+      struct agendamento* agendAtual = diaAtual->primeiroAgendamento;
+      struct agendamento* proxAgend = NULL;
+
+      if (agendAtual != NULL)
+        proxAgend = agendAtual->prox;
+
+      while (agendAtual != NULL) {
+        free(agendAtual->descricao);
+        free(agendAtual);
+
+        agendAtual = proxAgend;
+        if (proxAgend != NULL)
+          proxAgend = proxAgend->prox;
+      }
+
+      free(diaAtual);
+
+      diaAtual = proxDia;
+      if (proxDia != NULL)
+        proxDia = proxDia->prox;
+    }
+  }
+
+  free(calendario);
+
+  return;
 }
