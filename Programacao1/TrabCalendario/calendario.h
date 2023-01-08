@@ -23,3 +23,5 @@ struct mes* criarCalendario();
 void criarAgendamento(struct mes* calendario);
 
 void listarAgendamentos(struct mes* calendario);
+
+void fecharCalendario(struct mes* calendario);
